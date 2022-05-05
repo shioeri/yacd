@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
-import { LogOut } from 'react-feather';
+import { LogOut, RotateCw, Trash2 } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as logsApi from 'src/api/logs';
@@ -16,6 +16,7 @@ import * as logsApi from '$src/api/logs';
 import Select from '$src/components/shared/Select';
 import {
   darkModePureBlackToggleAtom,
+<<<<<<< HEAD
   latencyTestUrlAtom,
   selectedChartStyleIndexAtom,
   useApiConfig,
@@ -23,6 +24,14 @@ import {
 import { useClashConfig } from '$src/store/configs';
 import { ClashGeneralConfig } from '$src/store/types';
 
+=======
+  getClashAPIConfig,
+  getLatencyTestUrl,
+  getSelectedChartStyleIndex,
+} from '../store/app';
+import { fetchConfigs, getConfigs, updateConfigs, reloadConfigs, flushFakeIPPool } from '../store/configs';
+import { openModal } from '../store/modals';
+>>>>>>> 94a840a (feat: add reload config-file & flush fake-ip pool to config page)
 import Button from './Button';
 import s0 from './Config.module.scss';
 import { ContentHeader } from './ContentHeader';
@@ -48,6 +57,7 @@ const portFields = [
   { key: 'socks-port', label: 'SOCKS5 Proxy Port' },
   { key: 'mixed-port', label: 'Mixed Port' },
   { key: 'redir-port', label: 'Redir Port' },
+  { key: 'tproxy-port', label: 'tProxy Port' },
 ];
 
 const langOptions = [
@@ -138,6 +148,7 @@ function ConfigImpl({
             logsApi.reconnect({ ...apiConfig, logLevel: value });
           }
           break;
+        case 'tproxy-port':
         case 'redir-port':
         case 'socks-port':
         case 'mixed-port':
@@ -168,7 +179,8 @@ function ConfigImpl({
         case 'port':
         case 'socks-port':
         case 'mixed-port':
-        case 'redir-port': {
+        case 'redir-port':
+        case 'tproxy-port': {
           const num = parseInt(value, 10);
           if (num < 0 || num > 65535) return;
           mutation.mutate({ [name]: num });
@@ -184,6 +196,14 @@ function ConfigImpl({
     },
     [mutation, setLatencyTestUrl],
   );
+
+  const handleReloadConfigs = useCallback(() => {
+    dispatch(reloadConfigs(apiConfig));
+  },[apiConfig, dispatch]);
+
+  const handleFlushFakeIPPool = useCallback(() => {
+    dispatch(flushFakeIPPool(apiConfig));
+  },[apiConfig, dispatch]);
 
   const mode = useMemo(() => {
     const m = configState.mode;
@@ -312,6 +332,32 @@ function ConfigImpl({
           <label htmlFor="dark-mode-pure-black-toggle">
             {t('dark_mode_pure_black_toggle_label')}
           </label>
+        </div>
+      </div>
+
+      <div className={s0.sep}>
+        <div />
+      </div>
+
+      <div className={s0.section}>
+        <div>
+          <div className={s0.label}>Reload</div>
+          <Button
+              start={<RotateCw size={16} />}
+              label={t('reload_config_file')}
+              onClick={handleReloadConfigs}
+          />
+        </div>
+      </div>
+
+      <div className={s0.section}>
+        <div>
+          <div className={s0.label}>FakeIP</div>
+          <Button
+              start={<Trash2 size={16} />}
+              label={t('flush_fake_ip_pool')}
+              onClick={handleFlushFakeIPPool}
+          />
         </div>
       </div>
     </div>

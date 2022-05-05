@@ -42,4 +42,6 @@ export const data = {
   update_all_rule_provider: '更新所有 rule provider',
   update_all_proxy_provider: '更新所有 proxy providers',
   dark_mode_pure_black_toggle_label: '在黑色主题下使用纯黑背景',
+  reload_config_file: '重载配置文件',
+  flush_fake_ip_pool: '清除FakeIP数据库',
 };
