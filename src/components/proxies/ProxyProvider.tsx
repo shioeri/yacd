@@ -14,7 +14,7 @@ import {
   getProxySortBy,
 } from 'src/store/app';
 import { getDelay, healthcheckProviderByName } from 'src/store/proxies';
-import { DelayMapping, State } from 'src/store/types';
+import { DelayMapping, State, SubscriptionInfo } from 'src/store/types';
 
 import { ZapAnimated } from '$src/components/shared/ZapAnimated';
 import { useState2 } from '$src/hooks/basic';
@@ -34,6 +34,7 @@ type Props = {
   type: 'Proxy' | 'Rule';
   vehicleType: 'HTTP' | 'File' | 'Compatible';
   updatedAt?: string;
+  subscriptionInfo?: SubscriptionInfo;
   dispatch: (x: any) => Promise<any>;
   isOpen: boolean;
   apiConfig: any;
@@ -47,6 +48,7 @@ function ProxyProviderImpl({
   proxySortBy,
   vehicleType,
   updatedAt,
+  subscriptionInfo,
   isOpen,
   dispatch,
   apiConfig,
@@ -72,6 +74,27 @@ function ProxyProviderImpl({
   }, [isOpen, updateCollapsibleIsOpen, name]);
 
   const timeAgo = formatDistance(new Date(updatedAt), new Date());
+  const total = subscriptionInfo ? formatBytes(subscriptionInfo.Total) : 0;
+  const used = subscriptionInfo
+    ? formatBytes(subscriptionInfo.Download + subscriptionInfo.Upload)
+    : 0;
+  const percentage = subscriptionInfo
+    ? (
+        ((subscriptionInfo.Download + subscriptionInfo.Upload) / subscriptionInfo.Total) *
+        100
+      ).toFixed(2)
+    : 0;
+  const expireStr = () => {
+    if (subscriptionInfo.Expire === 0) {
+      return 'Null';
+    }
+    const expire = new Date(subscriptionInfo.Expire * 1000);
+    const getYear = expire.getFullYear() + '-';
+    const getMonth =
+      (expire.getMonth() + 1 < 10 ? '0' + (expire.getMonth() + 1) : expire.getMonth() + 1) + '-';
+    const getDate = (expire.getDate() < 10 ? '0' + expire.getDate() : expire.getDate()) + ' ';
+    return getYear + getMonth + getDate;
+  };
   return (
     <div className={s.main}>
       <div className={s.head}>
@@ -97,6 +120,12 @@ function ProxyProviderImpl({
         </div>
       </div>
       <div className={s.updatedAt}>
+        {subscriptionInfo && (
+          <small>
+            {used} / {total} ( {percentage}% ) &nbsp;&nbsp; Expire: {expireStr()}{' '}
+          </small>
+        )}
+        <br />
         <small>Updated {timeAgo} ago</small>
       </div>
       {isOpen ? <ProxyList all={proxies} /> : <ProxyListSummaryView all={proxies} />}
@@ -112,6 +141,16 @@ const arrow = {
   rest: { rotate: 0 },
   hover: { rotate: 360, transition: { duration: 0.3 } },
 };
+
+function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
 function Refresh() {
   const module = framerMotionResource.read();
   const motion = module.motion;

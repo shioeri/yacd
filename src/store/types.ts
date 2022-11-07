@@ -30,6 +30,13 @@ export type ClashGeneralConfig = {
 type LatencyHistoryItem = { time: string; delay: number };
 export type LatencyHistory = LatencyHistoryItem[];
 
+export type SubscriptionInfo = {
+  Download?: number;
+  Upload?: number;
+  Total?: number;
+  Expire?: number;
+};
+
 export type ProxyItem = {
   name: string;
   type: string;
@@ -55,6 +62,7 @@ export type ProxyProvider = {
   updatedAt: string;
   vehicleType: 'HTTP' | 'File' | 'Compatible';
   proxies: ProxyItem[];
+  subscriptionInfo?: SubscriptionInfo;
 };
 
 export type FormattedProxyProvider = Omit<ProxyProvider, 'proxies'> & { proxies: string[] };
