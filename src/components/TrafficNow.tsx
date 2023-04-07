@@ -21,7 +21,7 @@ export default connect(mapState)(TrafficNow);
 function TrafficNow({ apiConfig }: { apiConfig: ClashAPIConfig }) {
   const { t } = useTranslation();
   const { upStr, downStr } = useSpeed(apiConfig);
-  const { upTotal, dlTotal, connNumber } = useConnection(apiConfig);
+  const { upTotal, dlTotal, connNumber, mTotal } = useConnection(apiConfig);
   return (
     <div className={s0.TrafficNow}>
       <div className={s0.sec}>
@@ -43,6 +43,10 @@ function TrafficNow({ apiConfig }: { apiConfig: ClashAPIConfig }) {
       <div className={s0.sec}>
         <div>{t('Active Connections')}</div>
         <div>{connNumber}</div>
+      </div>
+      <div className={s0.sec}>
+        <div>{t('Memory Total')}</div>
+        <div>{mTotal}</div>
       </div>
     </div>
   );
@@ -66,13 +70,15 @@ function useConnection(apiConfig: ClashAPIConfig) {
     upTotal: '0 B',
     dlTotal: '0 B',
     connNumber: 0,
+    mTotal: '0 B',
   });
   const read = useCallback(
-    ({ downloadTotal, uploadTotal, connections }) => {
+    ({ downloadTotal, uploadTotal, connections, memory }) => {
       setState({
         upTotal: prettyBytes(uploadTotal),
         dlTotal: prettyBytes(downloadTotal),
         connNumber: connections.length,
+        mTotal: prettyBytes(memory),
       });
     },
     [setState],
