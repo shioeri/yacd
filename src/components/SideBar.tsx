@@ -4,10 +4,19 @@ import * as React from 'react';
 import { Info } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { FcAreaChart, FcDocument, FcGlobe, FcLink, FcRuler, FcSettings } from 'react-icons/fc';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
+
+import { fetchVersion } from 'src/api/version';
+import { ThemeSwitcher } from 'src/components/shared/ThemeSwitcher';
+import { connect } from 'src/components/StateProvider';
+import { getClashAPIConfig } from 'src/store/app';
+import { ClashAPIConfig } from 'src/types';
 
 import { ThemeSwitcher } from './shared/ThemeSwitcher';
 import s from './SideBar.module.scss';
+
+type Props = { apiConfig: ClashAPIConfig };
 
 const icons = {
   activity: FcAreaChart,
@@ -50,12 +59,21 @@ const pages = [
   { to: '/logs', iconId: 'file', labelText: 'Logs' },
 ];
 
-export default function SideBar() {
+const mapState = (s) => ({
+  apiConfig: getClashAPIConfig(s),
+});
+
+export default connect(mapState)(SideBar);
+
+export function SideBar(props: Props) {
   const { t } = useTranslation();
   const location = useLocation();
+  const { data: version } = useQuery(['/version', props.apiConfig], () =>
+    fetchVersion('/version', props.apiConfig)
+  );
   return (
     <div className={s.root}>
-      <div className={s.logoPlaceholder} />
+      <div className={version.meta && version.premium ? s.logo_singbox : version.meta ? s.logo_meta : s.logo_clash} />
       <div className={s.rows}>
         {pages.map(({ to, iconId, labelText }) => (
           <SideBarRow
