@@ -39,8 +39,15 @@ function AboutImpl(props: Props) {
     <>
       <ContentHeader title="About" />
       {version && version.version ? (
-        <Version name="Clash" version={version.version} link="https://github.com/Dreamacro/clash" />
-      ) : null}
+        <Version
+          name={
+            version.meta && version.premium ? 'sing-box' : version.meta ? 'Clash.Meta' : 'Clash'
+          }
+          version={version.version}
+          link={
+            version.meta && version.premium ? 'https://github.com/SagerNet/sing-box' : version.meta ? 'https://github.com/MetaCubeX/Clash.Meta' : 'https://github.com/Dreamacro/clash'
+          } />
+       ) : null}
       <Version name="Yacd" version={__VERSION__} link="https://github.com/haishanh/yacd" />
     </>
   );
