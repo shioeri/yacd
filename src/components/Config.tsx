@@ -222,6 +222,22 @@ function ConfigImpl({
     <div>
       <ContentHeader title={t('Config')} />
       <div className={s0.root}>
+<<<<<<< HEAD
+=======
+        {portFields.map((f) =>
+          configState[f.key] !== undefined ? (
+            <div key={f.key}>
+              <div className={s0.label}>{f.label}</div>
+              <Input
+                name={f.key}
+                value={configState[f.key]}
+                onChange={handleInputOnChange}
+                onBlur={handleInputOnBlur}
+              />
+            </div>
+          ) : null,
+        )}
+>>>>>>> b71735e (Config page adaptive backend)
         {(version.meta && version.premium) ||
           portFields.map((f) =>
             configState[f.key] !== undefined ? (
@@ -275,6 +291,7 @@ function ConfigImpl({
             </div>
           </div>
         )}
+<<<<<<< HEAD
       </div>
 
       <div className={s0.sep}>
@@ -298,6 +315,8 @@ function ConfigImpl({
               onClick={handleFlushFakeIPPool}
           />
         </div>
+=======
+>>>>>>> b71735e (Config page adaptive backend)
       </div>
 
       <div className={s0.sep}>
