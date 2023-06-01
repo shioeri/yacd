@@ -1,9 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
+import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
 import { LogOut } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import * as logsApi from 'src/api/logs';
+import { fetchVersion } from 'src/api/version';
+import Select from 'src/components/shared/Select';
+import { ClashGeneralConfig, DispatchFn, State } from 'src/store/types';
+import { ClashAPIConfig } from 'src/types';
 
 import { updateConfigs } from '$src/api/configs';
 import * as logsApi from '$src/api/logs';
@@ -71,6 +77,23 @@ function Config({ configs }: ConfigImplProps) {
     selectedChartStyleIndexAtom,
   );
   const apiConfig = useApiConfig();
+function getBackendContent(version: any): string {
+  if (version && version.meta && !version.premium) {
+    return 'Clash.Meta ';
+  } else if (version && version.meta && version.premium) {
+    return 'sing-box ';
+  } else {
+    return 'Clash Premium';
+  }
+}
+
+function ConfigImpl({
+  dispatch,
+  configs,
+  selectedChartStyleIndex,
+  latencyTestUrl,
+  apiConfig,
+}: ConfigImplProps) {
   const [configState, setConfigStateInternal] = useState(configs);
   const refConfigs = useRef(configs);
   useEffect(() => {
@@ -171,23 +194,28 @@ function Config({ configs }: ConfigImplProps) {
 
   const { t, i18n } = useTranslation();
 
+  const { data: version } = useQuery(['/version', apiConfig], () =>
+    fetchVersion('/version', apiConfig)
+  );
+
   return (
     <div>
       <ContentHeader title={t('Config')} />
       <div className={s0.root}>
-        {portFields.map((f) =>
-          configState[f.key] !== undefined ? (
-            <div key={f.key}>
-              <div className={s0.label}>{f.label}</div>
-              <Input
-                name={f.key}
-                value={configState[f.key]}
-                onChange={handleInputOnChange}
-                onBlur={handleInputOnBlur}
-              />
-            </div>
-          ) : null,
-        )}
+        {(version.meta && version.premium) ||
+          portFields.map((f) =>
+            configState[f.key] !== undefined ? (
+              <div key={f.key}>
+                <div className={s0.label}>{f.label}</div>
+                <Input
+                  name={f.key}
+                  value={configState[f.key]}
+                  onChange={handleInputOnChange}
+                  onBlur={handleInputOnBlur}
+                />
+              </div>
+            ) : null
+          )}
 
         <div>
           <div className={s0.label}>Mode</div>
@@ -215,6 +243,18 @@ function Config({ configs }: ConfigImplProps) {
           />
           <label htmlFor="config-allow-lan">Allow LAN</label>
         </div>
+        {(version.meta && version.premium) || (
+          <div>
+            <div className={s0.label}>Allow LAN</div>
+            <div className={s0.wrapSwitch}>
+              <Switch
+                name="allow-lan"
+                checked={configState['allow-lan']}
+                onChange={handleSwitchOnChange}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={s0.sep}>
@@ -254,7 +294,7 @@ function Config({ configs }: ConfigImplProps) {
         <div>
           <div className={s0.label}>
             {t('current_backend')}
-            <p>{apiConfig.baseURL}</p>
+            <p>{getBackendContent(version) + apiConfig.baseURL}</p>
           </div>
           <div className={s0.label}>Action</div>
           <Button
