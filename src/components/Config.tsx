@@ -283,6 +283,29 @@ function ConfigImpl({
 
       <div className={s0.section}>
         <div>
+          <div className={s0.label}>Reload</div>
+          <Button
+              start={<RotateCw size={16} />}
+              label={t('reload_config_file')}
+              onClick={handleReloadConfigs}
+          />
+        </div>
+        <div>
+          <div className={s0.label}>FakeIP</div>
+          <Button
+              start={<Trash2 size={16} />}
+              label={t('flush_fake_ip_pool')}
+              onClick={handleFlushFakeIPPool}
+          />
+        </div>
+      </div>
+
+      <div className={s0.sep}>
+        <div />
+      </div>
+
+      <div className={s0.section}>
+        <div>
           <div className={s0.label}>{t('latency_test_url')}</div>
           <SelfControlledInput
             name="latencyTestUrl"
@@ -332,32 +355,6 @@ function ConfigImpl({
           <label htmlFor="dark-mode-pure-black-toggle">
             {t('dark_mode_pure_black_toggle_label')}
           </label>
-        </div>
-      </div>
-
-      <div className={s0.sep}>
-        <div />
-      </div>
-
-      <div className={s0.section}>
-        <div>
-          <div className={s0.label}>Reload</div>
-          <Button
-              start={<RotateCw size={16} />}
-              label={t('reload_config_file')}
-              onClick={handleReloadConfigs}
-          />
-        </div>
-      </div>
-
-      <div className={s0.section}>
-        <div>
-          <div className={s0.label}>FakeIP</div>
-          <Button
-              start={<Trash2 size={16} />}
-              label={t('flush_fake_ip_pool')}
-              onClick={handleFlushFakeIPPool}
-          />
         </div>
       </div>
     </div>
