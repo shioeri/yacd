@@ -34,6 +34,36 @@ i18next
   .use(LngBackend)
   .init({
     debug: process.env.NODE_ENV === 'development',
+    // resources,
+    backend: {
+      loadPath: '/__{{lng}}/{{ns}}.json',
+      request: function (
+        _options: any,
+        url: string,
+        _payload: any,
+        callback: BackendRequestCallback
+      ) {
+        let p: PromiseLike<{ data: any }>;
+
+        switch (url) {
+          case '/__zh/translation.json':
+          case '/__zh-CN/translation.json':
+            p = allLocales.zh;
+            break;
+          case '/__en/translation.json':
+          default:
+            p = allLocales.zh;
+            break;
+        }
+
+        if (p) {
+          p.then((mod) => {
+            callback(null, { status: 200, data: mod.data });
+          });
+        }
+      },
+    },
+    supportedLngs: ['en', 'zh'],
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

@@ -17,8 +17,10 @@ const colorMap = {
   // yellow
   normal: '#d4b75c',
   // orange
-  bad: '#e67f3c',
-  // bad: '#F56C6C',
+  warn: '#e67f3c',
+  // red
+  bad: '#f35e5e',
+  // grey
   na: '#909399',
 };
 
@@ -31,6 +33,8 @@ function getLabelColor(latency: ProxyDelayItem) {
     return colorMap.good;
   } else if (number < 400) {
     return colorMap.normal;
+  } else if (number < 600) {
+    return colorMap.warn;
   } else if (typeof number === 'number') {
     return colorMap.bad;
   }
@@ -159,10 +163,40 @@ function ProxyImpl({ now, name, proxy, latency, isSelectable, onClick }: ProxyPr
         </ProxyNameTooltip>
       </div>
       <div className={s0.row}>
-        <span className={s0.proxyType} style={{ opacity: now ? 0.6 : 0.2 }}>
+              <div className={s0.row}>
+        <span className={s0.proxyType}
+          style={{
+              padding: '2px 2px',
+              paddingRight: 2,
+              paddingLeft: 2,
+              opacity: 0.7,
+              color: '#fff',
+              backgroundColor: color,
+              borderRadius: 2,
+              fontWeight: '',
+              fontSize: '10px',
+              textTransform: '',
+              fontStyle: '',
+          }}>
           {formatProxyType(proxy.type)}
         </span>
-        <ProxyLatency latency={latency} color={color} />
+        <span className={s0.proxyType}
+            style={{
+              padding: '2px 2px',
+              paddingRight: 2,
+              paddingLeft: 2,
+              opacity: 0.7,
+              backgroundColor: color,
+              borderRadius: 2,
+              fontWeight: 'bold',
+              fontSize: '10px',
+              textTransform: '',
+              fontStyle: '',
+            }}
+          >
+        <ProxyLatency latency={latency} color='#fff' />
+        </span>
+      </div>
       </div>
     </div>
   );

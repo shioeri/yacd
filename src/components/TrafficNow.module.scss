@@ -5,7 +5,11 @@
   flex-wrap: wrap;
 
   display: grid;
-  grid-template-columns: repeat(auto-fit, 180px);
+  grid-template-columns: 90%;
+  /* 当屏幕宽度大于300像素时，设置为一行两列 */
+  @media only screen and (min-width: 300px) {
+    grid-template-columns: 49% 49%;
+  }
   grid-gap: 10px;
 
   .sec {

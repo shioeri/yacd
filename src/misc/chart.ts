@@ -40,22 +40,22 @@ export const commonChartOptions: import('chart.js').ChartOptions<'line'> = {
 export const chartStyles = [
   {
     down: {
-      backgroundColor: 'rgba(176, 209, 132, 0.8)',
-      borderColor: 'rgb(176, 209, 132)',
+      backgroundColor: 'rgba(255, 141, 161)',
+      borderColor: 'rgb(255, 141, 161)',
     },
     up: {
-      backgroundColor: 'rgba(181, 220, 231, 0.8)',
+      backgroundColor: 'rgba(181, 220, 231)',
       borderColor: 'rgb(181, 220, 231)',
     },
   },
   {
-    up: {
-      backgroundColor: 'rgb(98, 190, 100)',
-      borderColor: 'rgb(78,146,79)',
-    },
     down: {
-      backgroundColor: 'rgb(160, 230, 66)',
-      borderColor: 'rgb(110, 156, 44)',
+      backgroundColor: 'rgba(255, 141, 161, 0.3)',
+      borderColor: 'rgb(255, 141, 161)',
+    },
+    up: {
+      backgroundColor: 'rgb(250,233,88, 0.3)',
+      borderColor: 'rgb(250, 233, 88)',
     },
   },
   {

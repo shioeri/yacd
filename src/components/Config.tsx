@@ -1,43 +1,29 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
-import { LogOut, RotateCw, Trash2 } from 'react-feather';
+import { DownloadCloud, LogOut, RotateCw, Trash2 } from 'react-feather';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import * as logsApi from 'src/api/logs';
 import { fetchVersion } from 'src/api/version';
 import Select from 'src/components/shared/Select';
 import { ClashGeneralConfig, DispatchFn, State } from 'src/store/types';
 import { ClashAPIConfig } from 'src/types';
 
-import { updateConfigs } from '$src/api/configs';
-import * as logsApi from '$src/api/logs';
-import Select from '$src/components/shared/Select';
 import {
   darkModePureBlackToggleAtom,
-<<<<<<< HEAD
-  latencyTestUrlAtom,
-  selectedChartStyleIndexAtom,
-  useApiConfig,
-} from '$src/store/app';
-import { useClashConfig } from '$src/store/configs';
-import { ClashGeneralConfig } from '$src/store/types';
-
-=======
   getClashAPIConfig,
   getLatencyTestUrl,
   getSelectedChartStyleIndex,
 } from '../store/app';
-import { fetchConfigs, getConfigs, updateConfigs, reloadConfigs, flushFakeIPPool } from '../store/configs';
+import { fetchConfigs, getConfigs, updateConfigs, reloadConfigs, flushFakeIPPool, updateGeoDatabasesFile } from '../store/configs';
 import { openModal } from '../store/modals';
->>>>>>> 94a840a (feat: add reload config-file & flush fake-ip pool to config page)
 import Button from './Button';
 import s0 from './Config.module.scss';
-import { ContentHeader } from './ContentHeader';
+import ContentHeader from './ContentHeader';
 import { ToggleInput } from './form/Toggle';
 import Input, { SelfControlledInput } from './Input';
 import { Selection2 } from './Selection';
+import { connect, useStoreActions } from './StateProvider';
 import TrafficChartSample from './TrafficChartSample';
 
 const { useEffect, useState, useCallback, useRef, useMemo } = React;
@@ -71,22 +57,43 @@ const modeOptions = [
   ['Direct', 'Direct'],
 ];
 
-export default function ConfigContainer() {
-  const { data } = useClashConfig();
-  return <Config configs={data} />;
+const mapState = (s: State) => ({
+  configs: getConfigs(s),
+  apiConfig: getClashAPIConfig(s),
+});
+
+const mapState2 = (s: State) => ({
+  selectedChartStyleIndex: getSelectedChartStyleIndex(s),
+  latencyTestUrl: getLatencyTestUrl(s),
+  apiConfig: getClashAPIConfig(s),
+});
+
+const Config = connect(mapState2)(ConfigImpl);
+export default connect(mapState)(ConfigContainer);
+
+function ConfigContainer({
+  dispatch,
+  configs,
+  apiConfig,
+}: {
+  dispatch: DispatchFn;
+  configs: ClashGeneralConfig;
+  apiConfig: ClashAPIConfig;
+}) {
+  useEffect(() => {
+    dispatch(fetchConfigs(apiConfig));
+  }, [dispatch, apiConfig]);
+  return <Config configs={configs} />;
 }
 
 type ConfigImplProps = {
+  dispatch: DispatchFn;
   configs: ClashGeneralConfig;
+  selectedChartStyleIndex: number;
+  latencyTestUrl: string;
+  apiConfig: ClashAPIConfig;
 };
 
-function Config({ configs }: ConfigImplProps) {
-  const navigate = useNavigate();
-  const [latencyTestUrl, setLatencyTestUrl] = useAtom(latencyTestUrlAtom);
-  const [selectedChartStyleIndex, setSelectedChartStyleIndex] = useAtom(
-    selectedChartStyleIndexAtom,
-  );
-  const apiConfig = useApiConfig();
 function getBackendContent(version: any): string {
   if (version && version.meta && !version.premium) {
     return 'Clash.Meta ';
@@ -112,6 +119,11 @@ function ConfigImpl({
     }
     refConfigs.current = configs;
   }, [configs]);
+
+  const openAPIConfigModal = useCallback(() => {
+    dispatch(openModal('apiConfig'));
+  }, [dispatch]);
+
   const setConfigState = useCallback(
     (name: keyof ClashGeneralConfig, val: ClashGeneralConfig[keyof ClashGeneralConfig]) => {
       setConfigStateInternal({ ...configState, [name]: val });
@@ -119,22 +131,14 @@ function ConfigImpl({
     [configState],
   );
 
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: updateConfigs(apiConfig),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/configs'] });
-    },
-  });
-
   const handleSwitchOnChange = useCallback(
     (checked: boolean) => {
       const name = 'allow-lan';
       const value = checked;
       setConfigState(name, value);
-      mutation.mutate({ 'allow-lan': value });
+      dispatch(updateConfigs(apiConfig, { 'allow-lan': value }));
     },
-    [mutation, setConfigState],
+    [apiConfig, dispatch, setConfigState],
   );
 
   const handleChangeValue = useCallback(
@@ -143,7 +147,7 @@ function ConfigImpl({
         case 'mode':
         case 'log-level':
           setConfigState(name, value);
-          mutation.mutate({ [name]: value });
+          dispatch(updateConfigs(apiConfig, { [name]: value }));
           if (name === 'log-level') {
             logsApi.reconnect({ ...apiConfig, logLevel: value });
           }
@@ -163,13 +167,15 @@ function ConfigImpl({
           return;
       }
     },
-    [apiConfig, mutation, setConfigState],
+    [apiConfig, dispatch, setConfigState],
   );
 
   const handleInputOnChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (e) => handleChangeValue(e.target),
     [handleChangeValue],
   );
+
+  const { selectChartStyleIndex, updateAppConfig } = useStoreActions();
 
   const handleInputOnBlur = useCallback<React.FocusEventHandler<HTMLInputElement>>(
     (e) => {
@@ -183,18 +189,18 @@ function ConfigImpl({
         case 'tproxy-port': {
           const num = parseInt(value, 10);
           if (num < 0 || num > 65535) return;
-          mutation.mutate({ [name]: num });
+          dispatch(updateConfigs(apiConfig, { [name]: num }));
           break;
         }
         case 'latencyTestUrl': {
-          setLatencyTestUrl(value);
+          updateAppConfig(name, value);
           break;
         }
         default:
           throw new Error(`unknown input name ${name}`);
       }
     },
-    [mutation, setLatencyTestUrl],
+    [apiConfig, dispatch, updateAppConfig],
   );
 
   const handleReloadConfigs = useCallback(() => {
@@ -204,6 +210,14 @@ function ConfigImpl({
   const handleFlushFakeIPPool = useCallback(() => {
     dispatch(flushFakeIPPool(apiConfig));
   },[apiConfig, dispatch]);
+
+  const handleUpgradeCore = useCallback(() => {
+    dispatch(upgradeCore(apiConfig));
+  }, [apiConfig, dispatch]);
+
+  const handleUpdateGeoDatabasesFile = useCallback(() => {
+    dispatch(updateGeoDatabasesFile(apiConfig));
+  }, [apiConfig, dispatch]);
 
   const mode = useMemo(() => {
     const m = configState.mode;
@@ -222,22 +236,6 @@ function ConfigImpl({
     <div>
       <ContentHeader title={t('Config')} />
       <div className={s0.root}>
-<<<<<<< HEAD
-=======
-        {portFields.map((f) =>
-          configState[f.key] !== undefined ? (
-            <div key={f.key}>
-              <div className={s0.label}>{f.label}</div>
-              <Input
-                name={f.key}
-                value={configState[f.key]}
-                onChange={handleInputOnChange}
-                onBlur={handleInputOnBlur}
-              />
-            </div>
-          ) : null,
-        )}
->>>>>>> b71735e (Config page adaptive backend)
         {(version.meta && version.premium) ||
           portFields.map((f) =>
             configState[f.key] !== undefined ? (
@@ -271,27 +269,18 @@ function ConfigImpl({
           />
         </div>
 
-        <div className={s0.item}>
-          <ToggleInput
-            id="config-allow-lan"
-            checked={configState['allow-lan']}
-            onChange={handleSwitchOnChange}
-          />
-          <label htmlFor="config-allow-lan">Allow LAN</label>
-        </div>
         {(version.meta && version.premium) || (
           <div>
-            <div className={s0.label}>Allow LAN</div>
-            <div className={s0.wrapSwitch}>
-              <Switch
-                name="allow-lan"
-                checked={configState['allow-lan']}
-                onChange={handleSwitchOnChange}
-              />
-            </div>
+          <div className={s0.item}>
+            <ToggleInput
+              id="config-allow-lan"
+              checked={configState['allow-lan']}
+              onChange={handleSwitchOnChange}
+            />
+            <label htmlFor="config-allow-lan">Allow LAN</label>
           </div>
+        </div>
         )}
-<<<<<<< HEAD
       </div>
 
       <div className={s0.sep}>
@@ -315,8 +304,14 @@ function ConfigImpl({
               onClick={handleFlushFakeIPPool}
           />
         </div>
-=======
->>>>>>> b71735e (Config page adaptive backend)
+        <div>
+          <div className={s0.label}>GEO Databases</div>
+          <Button
+              start={<DownloadCloud size={16} />}
+              label={t('update_geo_databases_file')}
+              onClick={handleUpdateGeoDatabasesFile}
+          />
+        </div>
       </div>
 
       <div className={s0.sep}>
@@ -350,7 +345,7 @@ function ConfigImpl({
             OptionComponent={TrafficChartSample}
             optionPropsList={propsList}
             selectedIndex={selectedChartStyleIndex}
-            onChange={(v: string) => setSelectedChartStyleIndex(parseInt(v, 10))}
+            onChange={selectChartStyleIndex}
           />
         </div>
         <div>
@@ -362,7 +357,7 @@ function ConfigImpl({
           <Button
             start={<LogOut size={16} />}
             label={t('switch_backend')}
-            onClick={() => navigate('/backend')}
+            onClick={openAPIConfigModal}
           />
         </div>
         <div className={s0.item}>

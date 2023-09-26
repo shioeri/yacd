@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - new
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,10 +23,15 @@ jobs:
       run: |
         pnpm install --frozen-lockfile
         pnpm build
-    - name: Deploy
-      uses: crazy-max/ghaction-github-pages@v3
+    # - name: Deploy
+      # uses: crazy-max/ghaction-github-pages@v3
+      # with:
+        # target_branch: gh-pages
+        # build_dir: public
+      # env:
+        # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
       with:
-        target_branch: gh-pages
-        build_dir: public
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: yacd
+        path: public
