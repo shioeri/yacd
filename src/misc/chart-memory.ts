@@ -39,14 +39,14 @@ export const memoryChartOptions: import('chart.js').ChartOptions<'line'> = {
 export const chartStyles = [
   {
     inuse: {
-      backgroundColor: 'rgba(	116, 162, 249, 0.8)',
-      borderColor: 'rgb(116, 162, 249)',
+      backgroundColor: 'rgba(255, 141, 161)',
+      borderColor: 'rgb(255, 141, 161)',
     },
   },
   {
     inuse: {
-      backgroundColor: 'rgb(98, 190, 100)',
-      borderColor: 'rgb(78,146,79)',
+      backgroundColor: 'rgba(255, 141, 161, 0.3)',
+      borderColor: 'rgb(255, 141, 161)',
     },
   },
   {

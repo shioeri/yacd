@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
-import { LogOut, RotateCw, Trash2 } from 'react-feather';
+import { DownloadCloud, LogOut, RotateCw, Trash2 } from 'react-feather';
 import { useTranslation } from 'react-i18next';
 import * as logsApi from 'src/api/logs';
 import { fetchVersion } from 'src/api/version';
@@ -15,7 +15,7 @@ import {
   getLatencyTestUrl,
   getSelectedChartStyleIndex,
 } from '../store/app';
-import { fetchConfigs, getConfigs, updateConfigs, reloadConfigs, flushFakeIPPool } from '../store/configs';
+import { fetchConfigs, getConfigs, updateConfigs, reloadConfigs, flushFakeIPPool, updateGeoDatabasesFile } from '../store/configs';
 import { openModal } from '../store/modals';
 import Button from './Button';
 import s0 from './Config.module.scss';
@@ -211,6 +211,14 @@ function ConfigImpl({
     dispatch(flushFakeIPPool(apiConfig));
   },[apiConfig, dispatch]);
 
+  const handleUpgradeCore = useCallback(() => {
+    dispatch(upgradeCore(apiConfig));
+  }, [apiConfig, dispatch]);
+
+  const handleUpdateGeoDatabasesFile = useCallback(() => {
+    dispatch(updateGeoDatabasesFile(apiConfig));
+  }, [apiConfig, dispatch]);
+
   const mode = useMemo(() => {
     const m = configState.mode;
     return typeof m === 'string' && m[0].toUpperCase() + m.slice(1);
@@ -228,22 +236,6 @@ function ConfigImpl({
     <div>
       <ContentHeader title={t('Config')} />
       <div className={s0.root}>
-<<<<<<< HEAD
-=======
-        {portFields.map((f) =>
-          configState[f.key] !== undefined ? (
-            <div key={f.key}>
-              <div className={s0.label}>{f.label}</div>
-              <Input
-                name={f.key}
-                value={configState[f.key]}
-                onChange={handleInputOnChange}
-                onBlur={handleInputOnBlur}
-              />
-            </div>
-          ) : null,
-        )}
->>>>>>> b71735e (Config page adaptive backend)
         {(version.meta && version.premium) ||
           portFields.map((f) =>
             configState[f.key] !== undefined ? (
@@ -277,27 +269,18 @@ function ConfigImpl({
           />
         </div>
 
-        <div className={s0.item}>
-          <ToggleInput
-            id="config-allow-lan"
-            checked={configState['allow-lan']}
-            onChange={handleSwitchOnChange}
-          />
-          <label htmlFor="config-allow-lan">Allow LAN</label>
-        </div>
         {(version.meta && version.premium) || (
           <div>
-            <div className={s0.label}>Allow LAN</div>
-            <div className={s0.wrapSwitch}>
-              <Switch
-                name="allow-lan"
-                checked={configState['allow-lan']}
-                onChange={handleSwitchOnChange}
-              />
-            </div>
+          <div className={s0.item}>
+            <ToggleInput
+              id="config-allow-lan"
+              checked={configState['allow-lan']}
+              onChange={handleSwitchOnChange}
+            />
+            <label htmlFor="config-allow-lan">Allow LAN</label>
           </div>
+        </div>
         )}
-<<<<<<< HEAD
       </div>
 
       <div className={s0.sep}>
@@ -321,8 +304,14 @@ function ConfigImpl({
               onClick={handleFlushFakeIPPool}
           />
         </div>
-=======
->>>>>>> b71735e (Config page adaptive backend)
+        <div>
+          <div className={s0.label}>GEO Databases</div>
+          <Button
+              start={<DownloadCloud size={16} />}
+              label={t('update_geo_databases_file')}
+              onClick={handleUpdateGeoDatabasesFile}
+          />
+        </div>
       </div>
 
       <div className={s0.sep}>

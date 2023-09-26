@@ -42,4 +42,5 @@ export const data = {
   dark_mode_pure_black_toggle_label: 'Use pure black in dark mode',
   reload_config_file: 'Reload config file',
   flush_fake_ip_pool: 'Flush fake-ip data',
+  update_geo_databases_file: 'Update GEO Databases',
 };

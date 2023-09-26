@@ -118,7 +118,7 @@ function formatConnectionDataItem(
     upload,
     download,
     start: now - new Date(start).valueOf(),
-    chains: chains.reverse().join(' / '),
+    chains: chains.reverse().join('↝'),
     rule: !rulePayload ? rule : `${rule}(${rulePayload})`,
     ...metadata,
     host: `${host2}:${destinationPort}`,
